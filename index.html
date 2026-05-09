@@ -1,1 +1,64 @@
-<h1>Hola desde mi propio servidor</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex Server</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #ff0000; text-shadow: 2px 2px #000; }
+        .pokedex { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; margin-top: 20px; }
+        .pokemon-card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; border: 3px solid #333; transition: transform 0.2s; }
+        .pokemon-card:hover { transform: scale(1.05); }
+        .type { display: inline-block; padding: 5px 10px; border-radius: 20px; color: white; font-size: 0.8em; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
+        .type-grass    { background: #78C850; }
+        .type-fire     { background: #F08030; }
+        .type-water    { background: #6890F0; }
+        .type-electric { background: #F8D030; color: #000; }
+        .type-bug      { background: #A8B820; }
+        .type-poison   { background: #A040A0; }
+        .type-normal   { background: #A8A878; }
+        .type-ground   { background: #E0C068; }
+        .type-fairy    { background: #EE99AC; }
+        .type-fighting { background: #C03028; }
+        .type-psychic  { background: #F85888; }
+        .type-rock     { background: #B8A038; }
+        .type-ghost    { background: #705898; }
+        .type-ice      { background: #98D8D8; color: #000; }
+        .type-dragon   { background: #7038F8; }
+        .type-steel    { background: #B8B8D0; color: #000; }
+        .type-dark     { background: #705848; }
+        .type-flying   { background: #A890F0; }
+    </style>
+</head>
+<body>
+    <h1>🔴 My TCP Pokédex Server</h1>
+    <div class="pokedex" id="pokedex">
+        </div>
+
+    <script>
+        // Function to fetch data from your own API
+        async function loadPokedex() {
+            const response = await fetch('/pokemon');
+            const data = await response.json();
+            const container = document.getElementById('pokedex');
+            container.innerHTML = '';
+
+            data.forEach(poke => {
+                const card = document.createElement('div');
+                card.className = 'pokemon-card';
+                card.innerHTML = `
+                    <h3>${poke.name}</h3>
+                    <p class="level">Level: ${poke.level}</p>
+                    <span class="type type-${poke.type.toLowerCase()}">${poke.type}</span>
+                    <p><small>ID: ${poke.id}</small></p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Load data on start
+        loadPokedex();
+    </script>
+</body>
+</html>
