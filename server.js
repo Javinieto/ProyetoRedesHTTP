@@ -15,9 +15,13 @@ const server = net.createServer((socket) => {
         // Split headers from body (mandatory for POST requests)
         const [headerPart, bodyPart] = requestText.split('\r\n\r\n');
         const lines = headerPart.split('\r\n');
+        
+        // Safety check to prevent errors with empty requests
+        if (!lines[0]) return;
+        
         const [method, path] = lines[0].split(' ');
 
-        console.log(`📩 Incoming Request: ${method} ${path}`);
+        console.log(`Incoming Request: ${method} ${path}`);
 
         // Main web
         if (method === 'GET' && (path === '/' || path === '/index.html')) {
@@ -42,6 +46,22 @@ const server = net.createServer((socket) => {
             socket.write(`Content-Length: ${Buffer.byteLength(body)}\r\n`);
             socket.write("\r\n");
             socket.write(body);
+            socket.end();
+        }
+        // Get a specific pokemon (get by id)
+        else if (method === 'GET' && path.startsWith('/pokemon/')) {
+            const idToSearch = parseInt(path.split('/')[2]);
+            const pokemon = pokedex.find(p => p.id === idToSearch);
+
+            if (pokemon) {
+                const body = JSON.stringify(pokemon);
+                socket.write("HTTP/1.1 200 OK\r\n");
+                socket.write("Content-Type: application/json\r\n");
+                socket.write(`Content-Length: ${Buffer.byteLength(body)}\r\n\r\n`);
+                socket.write(body);
+            } else {
+                socket.write("HTTP/1.1 404 Not Found\r\n\r\nPokemon ID not found");
+            }
             socket.end();
         }
         // Catch a pokemon (create)
@@ -116,5 +136,5 @@ const server = net.createServer((socket) => {
 const PORT = 3000;
 const HOST = '127.0.0.1';
 server.listen(PORT, HOST, () => {
-    console.log(`🔴 Pokedex Server running at http://${HOST}:${PORT}`);
+    console.log(`Pokedex Server running at http://${HOST}:${PORT}`);
 });
