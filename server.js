@@ -19,7 +19,7 @@ const server = net.createServer((socket) => {
 
         console.log(`📩 Incoming Request: ${method} ${path}`);
 
-        // --- ROUTE 1: Static Content (Main Web) ---
+        // Main web
         if (method === 'GET' && (path === '/' || path === '/index.html')) {
             fs.readFile('index.html', (err, content) => {
                 if (err) {
@@ -34,7 +34,7 @@ const server = net.createServer((socket) => {
                 socket.end();
             });
         } 
-        // --- ROUTE 2: API (List all Pokemon) ---
+        // List all pokemon (get)
         else if (method === 'GET' && path === '/pokemon') {
             const body = JSON.stringify(pokedex);
             socket.write("HTTP/1.1 200 OK\r\n");
@@ -44,7 +44,7 @@ const server = net.createServer((socket) => {
             socket.write(body);
             socket.end();
         }
-        // --- ROUTE 3: API (Catch/Create new Pokemon) ---
+        // Catch a pokemon (create)
         else if (method === 'POST' && path === '/pokemon') {
             try {
                 const newPoke = JSON.parse(bodyPart);
@@ -61,7 +61,46 @@ const server = net.createServer((socket) => {
             }
             socket.end();
         }
-        // --- ROUTE 4: Not Found ---
+        // Release a pokemon (delete)
+        else if (method === 'DELETE' && path.startsWith('/pokemon/')) {
+            const idToDelete = parseInt(path.split('/')[2]);
+            const initialLength = pokedex.length;
+            
+            // Filter the array to remove the pokemon with that ID
+            pokedex = pokedex.filter(p => p.id !== idToDelete);
+
+            if (pokedex.length < initialLength) {
+                const msg = `Pokemon with ID ${idToDelete} released.`;
+                socket.write("HTTP/1.1 200 OK\r\n");
+                socket.write(`Content-Length: ${msg.length}\r\n\r\n${msg}`);
+            } else {
+                socket.write("HTTP/1.1 404 Not Found\r\n\r\nID not found");
+            }
+            socket.end();
+        }
+        // Level up a pokemon (PUT)
+        else if (method === 'PUT' && path.startsWith('/pokemon/')) {
+            const idToUpdate = parseInt(path.split('/')[2]);
+            const index = pokedex.findIndex(p => p.id === idToUpdate);
+
+            if (index !== -1) {
+                try {
+                    const updatedData = JSON.parse(bodyPart);
+                    // Merging existing data with updated data
+                    pokedex[index] = { ...pokedex[index], ...updatedData };
+                    
+                    const msg = `Pokemon ID ${idToUpdate} updated successfully.`;
+                    socket.write("HTTP/1.1 200 OK\r\n");
+                    socket.write(`Content-Length: ${msg.length}\r\n\r\n${msg}`);
+                } catch (e) {
+                    socket.write("HTTP/1.1 400 Bad Request\r\n\r\nInvalid JSON");
+                }
+            } else {
+                socket.write("HTTP/1.1 404 Not Found\r\n\r\nID not found");
+            }
+            socket.end();
+        }
+        // Not found
         else {
             const errorMsg = "Resource not found";
             socket.write("HTTP/1.1 404 Not Found\r\n");

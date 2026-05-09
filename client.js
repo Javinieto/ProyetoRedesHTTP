@@ -54,7 +54,9 @@ console.log("    POKÉDEX TERMINAL CLI    ");
 console.log("============================");
 console.log("1. List all Pokémon (GET)");
 console.log("2. Catch a new Pokémon (POST)");
-console.log("3. Exit");
+console.log("3. Release a Pokémon (DELETE)");
+console.log("4. Level up a Pokémon (PUT)");
+console.log("5. Exit");
 
 rl.question('\nSelect an option: ', (choice) => {
     switch (choice) {
@@ -78,6 +80,24 @@ rl.question('\nSelect an option: ', (choice) => {
             });
             break;
         case '3':
+            rl.question('Enter the ID of the Pokemon to release: ', (id) => {
+                sendRequest('DELETE', `/pokemon/${id}`);
+            });
+            break;
+        case '4':
+            rl.question('Enter the ID of the Pokemon to edit: ', (id) => {
+                rl.question('Enter New Name: ', (name) => {
+                    rl.question('Enter New Level: ', (level) => {
+                        const updatedPokemon = { 
+                            name: name, 
+                            level: parseInt(level) 
+                        };
+                        sendRequest('PUT', `/pokemon/${id}`, updatedPokemon);
+                    });
+                });
+            });
+            break;
+        case '5':
             console.log("Goodbye!");
             rl.close();
             break;
