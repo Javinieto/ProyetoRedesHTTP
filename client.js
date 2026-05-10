@@ -6,16 +6,13 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Global configuration
-// This allows the user to change the destination URL and Port dynamically
 let serverConfig = {
     host: '127.0.0.1',
-    port: 3000
+    port: 3000,
+    customHeader: ""
 };
 
-// Send manual HTTP request over a TCP socket
 function sendRequest(method, path, body = null) {
-    // We use serverConfig variables instead of hardcoded values
     const client = net.createConnection({ port: serverConfig.port, host: serverConfig.host }, () => {
         console.log(`\nConnecting to ${serverConfig.host}:${serverConfig.port}...`);
         console.log(`Sending ${method} request to ${path}`);
@@ -24,7 +21,11 @@ function sendRequest(method, path, body = null) {
                       `Host: ${serverConfig.host}:${serverConfig.port}\r\n` +
                       `Connection: close\r\n`;
 
-        if (body) {
+        if (serverConfig.customHeader) {
+            request += `${serverConfig.customHeader}\r\n`;
+        }
+
+        if (body && method !== 'HEAD') {
             const bodyData = JSON.stringify(body);
             request += `Content-Type: application/json\r\n` +
                        `Content-Length: ${Buffer.byteLength(bodyData)}\r\n\r\n` +
@@ -49,19 +50,21 @@ function sendRequest(method, path, body = null) {
     });
 }
 
-// Main menu
 function showMenu() {
     console.log("============================");
     console.log(`    POKÉDEX TERMINAL CLI    `);
     console.log(`    Connected to: ${serverConfig.host}:${serverConfig.port}`);
+    console.log(`    Header: ${serverConfig.customHeader || "None"}`);
     console.log("============================");
     console.log("1. List all Pokémon (GET)");
-    console.log("2. Catch a new Pokémon (POST)");
-    console.log("3. Release a Pokémon (DELETE)");
-    console.log("4. Level up a Pokémon (PUT)");
-    console.log("5. Search Pokémon by ID (GET)");
-    console.log("6. Change Server Settings (URL/Port)");
-    console.log("7. Exit");
+    console.log("2. Get Headers Only (HEAD)");
+    console.log("3. Catch a new Pokémon (POST)");
+    console.log("4. Release a Pokémon (DELETE)");
+    console.log("5. Level up a Pokémon (PUT)");
+    console.log("6. Search Pokémon by ID (GET)");
+    console.log("7. Change Server Settings (URL/Port)");
+    console.log("8. Set Custom Header");
+    console.log("9. Exit");
 
     rl.question('\nSelect an option: ', (choice) => {
         switch (choice) {
@@ -69,6 +72,9 @@ function showMenu() {
                 sendRequest('GET', '/pokemon');
                 break;
             case '2':
+                sendRequest('HEAD', '/pokemon');
+                break;
+            case '3':
                 rl.question('Enter Pokemon Name: ', (name) => {
                     rl.question('Enter Type: ', (type) => {
                         rl.question('Enter Level: ', (level) => {
@@ -83,12 +89,12 @@ function showMenu() {
                     });
                 });
                 break;
-            case '3':
+            case '4':
                 rl.question('Enter the ID of the Pokemon to release: ', (id) => {
                     sendRequest('DELETE', `/pokemon/${id}`);
                 });
                 break;
-            case '4':
+            case '5':
                 rl.question('Enter the ID of the Pokemon to edit: ', (id) => {
                     rl.question('Enter New Name: ', (name) => {
                         rl.question('Enter New Level: ', (level) => {
@@ -101,37 +107,39 @@ function showMenu() {
                     });
                 });
                 break;
-            case '5':
+            case '6':
                 rl.question('Enter the ID of the Pokemon you want to find: ', (id) => {
                     sendRequest('GET', `/pokemon/${id}`);
                 });
                 break;
-            case '6':
+            case '7':
                 console.log("\n--- SERVER SETTINGS ---");
                 rl.question(`Enter new Host/IP (current: ${serverConfig.host}): `, (newHost) => {
                     rl.question(`Enter new Port (current: ${serverConfig.port}): `, (newPort) => {
-                        
-                        // Si el usuario escribe algo, lo cambiamos. Si pulsa Enter, se queda el actual.
                         if (newHost.trim() !== "") {
                             serverConfig.host = newHost;
                         }
-
                         if (newPort.trim() !== "") {
                             const parsedPort = parseInt(newPort);
-                            // Validamos que el puerto sea un número real
                             if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort < 65535) {
                                 serverConfig.port = parsedPort;
                             } else {
                                 console.log("Invalid port number. Keeping the previous one.");
                             }
                         }
-                        
                         console.log(`\nSettings updated to: ${serverConfig.host}:${serverConfig.port}`);
                         showMenu();
                     });
                 });
                 break;
-            case '7':
+            case '8':
+                rl.question('Enter custom header (Key: Value): ', (header) => {
+                    serverConfig.customHeader = header;
+                    console.log("Custom header updated.");
+                    showMenu();
+                });
+                break;
+            case '9':
                 console.log("Goodbye!");
                 rl.close();
                 process.exit();
@@ -144,5 +152,4 @@ function showMenu() {
     });
 }
 
-// Start the application
 showMenu();
