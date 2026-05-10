@@ -84,7 +84,7 @@ const server = net.createServer((socket) => {
             try {
                 const newPoke = JSON.parse(bodyPart);
                 pokedex.push(newPoke);
-                console.log(`✨ Successfully caught: ${newPoke.name}`);
+                console.log(`Successfully caught: ${newPoke.name}`);
                 writeLog(`CREATED: Pokemon ${newPoke.name}`);
 
                 const responseMessage = "Pokemon added to Pokedex";

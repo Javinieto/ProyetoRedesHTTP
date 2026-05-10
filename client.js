@@ -45,16 +45,16 @@ function sendRequest(method, path, body = null) {
     });
 
     client.on('error', (err) => {
-        console.error('Connection Error:', err.message);
+        console.error('\nConnection Error:', err.message);
         showMenu();
     });
 }
 
 function showMenu() {
     console.log("============================");
-    console.log(`    POKÉDEX TERMINAL CLI    `);
-    console.log(`    Connected to: ${serverConfig.host}:${serverConfig.port}`);
-    console.log(`    Header: ${serverConfig.customHeader || "None"}`);
+    console.log(`     POKÉDEX TERMINAL CLI    `);
+    console.log(`     Connected to: ${serverConfig.host}:${serverConfig.port}`);
+    console.log(`     Header: ${serverConfig.customHeader || "None"}`);
     console.log("============================");
     console.log("1. List all Pokémon (GET)");
     console.log("2. Get Headers Only (HEAD)");
@@ -64,7 +64,7 @@ function showMenu() {
     console.log("6. Search Pokémon by ID (GET)");
     console.log("7. Change Server Settings (URL/Port)");
     console.log("8. Set Custom Header");
-    console.log("9. Exit");
+    console.log("0. Exit");
 
     rl.question('\nSelect an option: ', (choice) => {
         switch (choice) {
@@ -116,18 +116,12 @@ function showMenu() {
                 console.log("\n--- SERVER SETTINGS ---");
                 rl.question(`Enter new Host/IP (current: ${serverConfig.host}): `, (newHost) => {
                     rl.question(`Enter new Port (current: ${serverConfig.port}): `, (newPort) => {
-                        if (newHost.trim() !== "") {
-                            serverConfig.host = newHost;
-                        }
+                        if (newHost.trim() !== "") serverConfig.host = newHost;
                         if (newPort.trim() !== "") {
                             const parsedPort = parseInt(newPort);
-                            if (!isNaN(parsedPort) && parsedPort > 0 && parsedPort < 65535) {
-                                serverConfig.port = parsedPort;
-                            } else {
-                                console.log("Invalid port number. Keeping the previous one.");
-                            }
+                            if (!isNaN(parsedPort)) serverConfig.port = parsedPort;
                         }
-                        console.log(`\nSettings updated to: ${serverConfig.host}:${serverConfig.port}`);
+                        console.log(`\nSettings updated!`);
                         showMenu();
                     });
                 });
@@ -139,7 +133,7 @@ function showMenu() {
                     showMenu();
                 });
                 break;
-            case '9':
+            case '0':
                 console.log("Goodbye!");
                 rl.close();
                 process.exit();
