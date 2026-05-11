@@ -52,9 +52,9 @@ function sendRequest(method, path, body = null) {
 
 function showMenu() {
     console.log("============================");
-    console.log(`     POKÉDEX TERMINAL CLI    `);
-    console.log(`     Connected to: ${serverConfig.host}:${serverConfig.port}`);
-    console.log(`     Header: ${serverConfig.customHeader || "None"}`);
+    console.log(`POKÉDEX TERMINAL CLI`);
+    console.log(`Connected to: ${serverConfig.host}:${serverConfig.port}`);
+    console.log(`Header: ${serverConfig.customHeader || "None"}`);
     console.log("============================");
     console.log("1. List all Pokémon (GET)");
     console.log("2. Get Headers Only (HEAD)");

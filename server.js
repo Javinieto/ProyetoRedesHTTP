@@ -28,6 +28,12 @@ const server = net.createServer((socket) => {
         
         const [method, path] = lines[0].split(' ');
 
+        if (path === '/favicon.ico') {
+            socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+            socket.end();
+            return; 
+        }
+        
         console.log(`Incoming Request: ${method} ${path}`);
         writeLog(`${method} ${path} - Client: ${clientIp}`);
 
