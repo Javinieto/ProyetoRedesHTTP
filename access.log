@@ -2,3 +2,17 @@
 [2026-05-11T14:19:25.602Z] GET /pokemon - Client: 127.0.0.1
 [2026-05-11T14:20:00.316Z] GET / - Client: 127.0.0.1
 [2026-05-11T14:20:00.428Z] GET /pokemon - Client: 127.0.0.1
+[2026-05-12T09:45:07.971Z] SERVER STARTED at http://127.0.0.1:3000
+[2026-05-12T09:45:58.823Z] GET / - Client: 127.0.0.1
+[2026-05-12T09:45:58.914Z] GET /pokemon - Client: 127.0.0.1
+[2026-05-12T09:46:19.397Z] GET /pokemon?type=Fire - Client: 127.0.0.1
+[2026-05-12T09:46:19.397Z] FILTERED: Searching for type Fire
+[2026-05-12T09:46:46.197Z] FILTERED: Searching for type fire
+[2026-05-12T09:46:46.197Z] GET /pokemon?type=fire - Client: 127.0.0.1
+[2026-05-12T09:46:55.280Z] GET /pokemon?type=grass - Client: 127.0.0.1
+[2026-05-12T09:46:55.280Z] FILTERED: Searching for type grass
+[2026-05-12T09:54:24.957Z] SERVER STARTED at http://127.0.0.1:3000
+[2026-05-12T09:54:39.390Z] FILTERED: Searching for type Fire
+[2026-05-12T09:54:39.390Z] GET /pokemon?type=Fire - Client: 127.0.0.1
+[2026-05-12T09:55:23.182Z] 404 Not Found on PUT: ID 6
+[2026-05-12T09:55:23.182Z] PUT /pokemon/6 - Client: 127.0.0.1

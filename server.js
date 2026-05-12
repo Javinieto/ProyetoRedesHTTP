@@ -1,12 +1,14 @@
-const net = require('net');
-const fs = require('fs');
+const net = require('net'); //Import the module to create servers
+const fs = require('fs'); // Import the file to read HTML (writte the logs)
 
+// Set default data
 let pokedex = [
     { id: 1, name: "Bulbasaur", type: "Grass", level: 5 },
     { id: 2, name: "Charmander", type: "Fire", level: 5 },
     { id: 3, name: "Squirtle", type: "Water", level: 5 }
 ];
 
+// Function so save the logs
 function writeLog(message) {
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] ${message}\n`;
@@ -14,26 +16,29 @@ function writeLog(message) {
         if (err) console.error("Error writing to log file:", err);
     });
 }
-
+// When someone connects
 const server = net.createServer((socket) => {
-    const clientIp = socket.remoteAddress;
+    const clientIp = socket.remoteAddress; // Save the IP
 
     socket.on('data', (data) => {
         const requestText = data.toString();
         
-        const [headerPart, bodyPart] = requestText.split('\r\n\r\n');
-        const lines = headerPart.split('\r\n');
+        const [headerPart, bodyPart] = requestText.split('\r\n\r\n'); // Header:Contains the instructions & Body: Contains the data (of the pokemon)
+        const lines = headerPart.split('\r\n'); // Divide header in lines
         
+        // Check if the packet is empty
         if (!lines[0]) return;
         
-        const [method, path] = lines[0].split(' ');
+        const [method, path] = lines[0].split(' '); //Separates each line by blank spaces (Method: GET & Path: /pokemon)
 
+        // Remove favicon from the log (returns 404 if asked for the icon)
         if (path === '/favicon.ico') {
             socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
             socket.end();
             return; 
         }
         
+        // Print what is happening
         console.log(`Incoming Request: ${method} ${path}`);
         writeLog(`${method} ${path} - Client: ${clientIp}`);
 
@@ -60,16 +65,36 @@ const server = net.createServer((socket) => {
                 socket.write(`Content-Length: ${msg.length}\r\n\r\n${msg}`);
                 socket.end();
             }
-        } 
-        else if ((method === 'GET' || method === 'HEAD') && path === '/pokemon') {
-            const body = JSON.stringify(pokedex);
-            socket.write("HTTP/1.1 200 OK\r\n");
-            socket.write("Content-Type: application/json\r\n");
-            socket.write(`Content-Length: ${Buffer.byteLength(body)}\r\n`);
-            socket.write("\r\n");
-            if (method === 'GET') socket.write(body);
-            socket.end();
         }
+        // Get all pokemon
+        else if ((method === 'GET' || method === 'HEAD') && path.startsWith('/pokemon')) {
+            // If is exactly /pokemon show all
+            if (path === '/pokemon' || path.includes('?')) {
+                let results = pokedex;
+
+                // Advanced CRUD logic
+                if (path.includes('?')) {
+                    const queryString = path.split('?')[1]; // Example: http://127.0.0.1:3000/pokemon?type=Fire
+                    const [key, value] = queryString.split('=');
+
+                    if (key === 'type' && value) {
+                        results = pokedex.filter(p => p.type.toLowerCase() === value.toLowerCase());
+                        writeLog(`FILTERED: Searching for type ${value}`);
+                    }
+                }
+
+                const body = JSON.stringify(results);
+                socket.write("HTTP/1.1 200 OK\r\n");
+                socket.write("Content-Type: application/json\r\n");
+                socket.write(`Content-Length: ${Buffer.byteLength(body)}\r\n`);
+                socket.write("\r\n");
+                
+                if (method === 'GET') socket.write(body);
+                socket.end();
+                return; // Prevents to get to the next IF
+            }
+        }
+        // Get pokemon by ID
         else if ((method === 'GET' || method === 'HEAD') && path.startsWith('/pokemon/')) {
             const idToSearch = parseInt(path.split('/')[2]);
             const pokemon = pokedex.find(p => p.id === idToSearch);
@@ -86,6 +111,7 @@ const server = net.createServer((socket) => {
             }
             socket.end();
         }
+        // Create pokemon
         else if (method === 'POST' && path === '/pokemon') {
             try {
                 const newPoke = JSON.parse(bodyPart);
@@ -104,6 +130,7 @@ const server = net.createServer((socket) => {
             }
             socket.end();
         }
+        // Delete pokemon
         else if (method === 'DELETE' && path.startsWith('/pokemon/')) {
             const idToDelete = parseInt(path.split('/')[2]);
             const initialLength = pokedex.length;
@@ -121,6 +148,7 @@ const server = net.createServer((socket) => {
             }
             socket.end();
         }
+        // Edit pokemon
         else if (method === 'PUT' && path.startsWith('/pokemon/')) {
             const idToUpdate = parseInt(path.split('/')[2]);
             const index = pokedex.findIndex(p => p.id === idToUpdate);

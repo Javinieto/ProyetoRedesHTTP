@@ -64,6 +64,7 @@ function showMenu() {
     console.log("6. Search Pokémon by ID (GET)");
     console.log("7. Change Server Settings (URL/Port)");
     console.log("8. Set Custom Header");
+    console.log("9. Filter Pokémon by TYPE (Advanced CRUD)");
     console.log("0. Exit");
 
     rl.question('\nSelect an option: ', (choice) => {
@@ -131,6 +132,11 @@ function showMenu() {
                     serverConfig.customHeader = header;
                     console.log("Custom header updated.");
                     showMenu();
+                });
+                break;
+            case '9': // Lógica para el filtro por tipo
+                rl.question('Enter the type to filter by (Example: Fire, Water, Grass): ', (type) => {
+                    sendRequest('GET', `/pokemon?type=${type}`);
                 });
                 break;
             case '0':
